@@ -5,28 +5,37 @@ def FetchSymbols(query):
 	ticker = yf.Lookup(query)
 	df = ticker.stock.reset_index()
 	symbols = df.loc[df.exchange == "NSI", "symbol"].tolist()
-	return symbols
+
+	for i, symbol in enumerate(symbols):
+		ticker = yf.Ticker(symbol)
+		data = ticker.info
+		print(f"\n{i+1} ===== ", symbol, " =====")
+		print("Company Name:", data["shortName"])
+		print("Industry:", data["industry"])
+		print("====================================\n")
+		
 	
 def FetchStockData(symbols):
-	tickers = yf.Tickers(symbols)
+	tickers = yf.Tickers(" ".join(symbols))
+
 	for symbol in symbols:
+		ticker = tickers.tickers[symbol]
+		info = ticker.get_info()
 		try:
-			ticker = tickers.tickers[symbol]
-			data = ticker.info
-			
 			print("\n===== ", symbol, " =====")
-			
-			print("Company Name:", data["shortName"])
-			print("Website url:", data["website"])
-			print("Industry:", data["industry"])
-			print("About Company:", data["longBusinessSummary"])
-			print("Employees Count:", data["fullTimeEmployees"])
-			print("Market Cap:", data["marketCap"], data["currency"])
-			print("Current Share Price:", data["currentPrice"])
+			print("Company Name:", info.get("shortName"))
+			print("Website URL:", info.get("website"))
+			print("Industry:", info.get("industry"))
+			print("About Company:", info.get("longBusinessSummary"))
+			print("Employees Count:", info.get("fullTimeEmployees"))
+			print("Market Cap:", info.get("marketCap"), info.get("currency"))
+			print("Current Share Price:", info.get("currentPrice"))
 			print("====================================\n")
-			
-		except Exception as e:
-			print(f"Error fetching data for {symbol}: {e}")
-			
-symbol = FetchSymbols("bajaj")
-FetchStockData(symbol)
+		except KeyError as e:
+			print(e)
+	return ""
+
+
+
+query = input("Query: ")
+FetchSymbols(query)

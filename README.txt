@@ -36,3 +36,6 @@ installation
 [
 	bash run.sh
 ]
+
+Boooom you done !
+Enjoy !

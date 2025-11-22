@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -9,13 +9,13 @@ if [ ! -d ".venv" ]; then
 fi
 
 echo -e "${GREEN}Activating Virtual Environment...${NC}"
-source .ven/bin/activate
+source .venv/bin/activate
 
-pip install --upgrade pip
+python3 -m pip install --upgrade pip
 
 
 echo -e "${GREEN}Installing requirements...${NC}"
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 
 
 echo -e "${GREEN}Installing requirements...${NC}"

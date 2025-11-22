@@ -2,10 +2,12 @@ import streamlit as st
 from middleware.StockInfo import FetchSymbols
 from middleware.StockInfo import FetchStockData 
 import yfinance as yf
+import pandas as pd
+from utils.debug import FormatedJson
 
 st.title("📊 Stocks Data Extractor")
 
-query = st.text_input("", placeholder = "Search for a stock symbol or name: ")
+query = st.text_input("Search", placeholder = "Search for a stock symbol or name: ")
 
 if query:
 	results = list(FetchSymbols(query))
@@ -22,9 +24,9 @@ if query:
 			# Gets symbols from selected radio button
 			selected_symbol = options[get_symbol]
 			st.write("You selected symbol:", selected_symbol)
-			
+
 			# Fetchs Fundamental stock data
-			fundamental_data = FetchStockData(selected_symbol)
+			fundamental_data = FetchStockData([selected_symbol])
 			
 			st.subheader("🏢 Company & Fundamental Data")
 			st.json(fundamental_data)
@@ -32,16 +34,15 @@ if query:
 			duration_options = ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "ytd", "max"]
 			selected_duration = st.selectbox("Select time period:", duration_options)
 			
-			stock_data = yf.download(selected_symbol, period=selected_duration)
-			
+			stock_data = yf.download(selected_symbol, period=selected_duration, multi_level_index=False)
+
 			if stock_data.empty:
 				st.warning("No data available for this symbol and duration.")
 			else:
-				# --- Show stock data ---
+				
 				st.subheader("📈 Stock Data Preview")
 				st.dataframe(stock_data)
-				
-				# --- Download button ---
+			
 				csv_data = stock_data.to_csv().encode("utf-8")
 				st.download_button(
 				label="📥 Download stock data",
@@ -50,6 +51,11 @@ if query:
 				mime="text/csv"
 				)
 				
-				# --- Optional: Line chart ---
-				st.subheader("📊 Stock Price Chart")
-				st.line_chart(stock_data['Close'])
+			close_data = stock_data['Close'].dropna()
+			
+			st.subheader("📊 Stock Price Chart")
+			
+			if close_data.empty:
+			    st.warning("No valid closing price available — market may be closed (holiday/weekend).")
+			else:
+			    st.line_chart(close_data)

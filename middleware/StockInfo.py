@@ -1,5 +1,4 @@
 import yfinance as yf
-import json
 
 def FetchSymbols(query):
 	ticker = yf.Lookup(query)
@@ -15,14 +14,19 @@ def FetchSymbols(query):
 		yield [i+1,symbol, Name, Industry]
 
 def FetchStockData(symbols):
-    tickers = yf.Tickers(" ".join(symbols))
+    if isinstance(symbols, str):
+        symbols = [symbols]
+
     all_data = []
 
     for symbol in symbols:
-        ticker = tickers.tickers[symbol]
-        info = ticker.get_info()
+        ticker = yf.Ticker(symbol)
+        try:
+            info = ticker.info
+        except Exception as e:
+            print(f"Failed to fetch {symbol}: {e}")
+            continue
         
-        # Store data in a dictionary
         stock_data = {
             "Symbol": symbol,
             "Company Name": info.get("shortName", "N/A"),
@@ -58,3 +62,4 @@ def FetchStockData(symbols):
         all_data.append(stock_data)
 
     return all_data
+
